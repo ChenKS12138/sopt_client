@@ -1,0 +1,8 @@
+name: bt_cli
+authors:
+  - "cattchen"
+environment:
+  sdk: ">=2.12.0 <3.0.0"
+dependencies:
+  bt_core:
+    path: "../bt_core"
