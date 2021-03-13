@@ -1,9 +1,9 @@
-/**
- *  1. String              "abc" => 3:abc
- *  2. Int                 123 => i123e
- *  3. List<Object>        List<"abc", 123> => l3:abci123ee
- *  4. Dict<String,Object> Dictionary<{"name":"create chen"},{"age":23}> => d4:name11:create chen3:agei23ee
- */
+// /**
+//  *  1. String              3:abc => "abc"
+//  *  2. Int                 i123e => 123
+//  *  3. List<Object>        l3:abci123ee => List<"abc", 123>
+//  *  4. Dict<String,Object> d4:name11:create chen3:agei23ee => Dictionary<{"name":"create chen"},{"age":23}>
+//  */
 
 /**
  * RuneType
@@ -18,21 +18,16 @@ enum RuneType {
   SIGN, // SIGN
 }
 
-dynamic parse(String str) {
-  RuneIterator iter = RuneIterator.at(str, 0)..moveNext();
-  return builder(iter);
-}
-
-dynamic builder(Iterator<int> iter) {
+dynamic decode(Iterator<int> iter) {
   final runeType = runeTypeFromCode(iter.current);
   if (runeType == RuneType.I) {
-    return buildInt(iter);
+    return decodeInt(iter);
   } else if (runeType == RuneType.DIGIT) {
-    return buildString(iter);
+    return decodeString(iter);
   } else if (runeType == RuneType.L) {
-    return buildList(iter);
+    return decodeList(iter);
   } else if (runeType == RuneType.D) {
-    return buildDict(iter);
+    return decodeDict(iter);
   } else if (runeType == RuneType.E) {
     return null;
   } else {
@@ -40,8 +35,8 @@ dynamic builder(Iterator<int> iter) {
   }
 }
 
-Map buildDict(Iterator<int> iter) {
-  Map map = {};
+Map<String, dynamic> decodeDict(Iterator<int> iter) {
+  Map<String, dynamic> map = {};
   if (runeTypeFromCode(iter.current) != RuneType.D) {
     throw Error.safeToString("Invalid Dict Start");
   }
@@ -50,26 +45,25 @@ Map buildDict(Iterator<int> iter) {
     if (runeTypeFromCode(iter.current) == RuneType.E) {
       break;
     }
-    dynamic key = builder(iter);
-
+    dynamic key = decode(iter);
     if (key.runtimeType != String) {
       throw Error.safeToString("Invalid Map Key");
     }
-    dynamic value = builder(iter);
+    dynamic value = decode(iter);
     map[key] = value;
   }
   iter.moveNext();
   return map;
 }
 
-List buildList(Iterator<int> iter) {
+List decodeList(Iterator<int> iter) {
   List list = [];
   if (runeTypeFromCode(iter.current) != RuneType.L) {
     throw Error.safeToString("Invalid List Start");
   }
   iter.moveNext();
   while (true) {
-    dynamic item = builder(iter);
+    dynamic item = decode(iter);
     if (item == null) {
       break;
     } else {
@@ -80,7 +74,7 @@ List buildList(Iterator<int> iter) {
   return list;
 }
 
-int buildInt(Iterator<int> iter) {
+int decodeInt(Iterator<int> iter) {
   if (runeTypeFromCode(iter.current) != RuneType.I) {
     throw Error.safeToString("Invalid Int");
   }
@@ -104,7 +98,7 @@ int buildInt(Iterator<int> iter) {
   return int.parse(intStr);
 }
 
-String buildString(Iterator<int> iter) {
+String decodeString(Iterator<int> iter) {
   var lenStr = "";
   do {
     final runeType = runeTypeFromCode(iter.current);

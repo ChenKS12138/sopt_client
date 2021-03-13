@@ -1,3 +1,5 @@
 **/.packages/
 **/.dart_tool/
 *.torrent
+*.log
+**/**/.DS_Store
